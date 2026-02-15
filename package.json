@@ -1,0 +1,19 @@
+{
+  "name": "premeet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pre-appointment context for service professionals",
+  "workspaces": [
+    "website"
+  ],
+  "scripts": {
+    "website:dev": "cd website && npm run dev",
+    "website:build": "cd website && npm run build",
+    "extension:build": "cd extension && npm run build",
+    "supabase:migrate": "supabase db push",
+    "supabase:seed": "supabase db reset"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

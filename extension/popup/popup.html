@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrepMeet</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Auth screen -->
+    <div id="auth-screen" class="screen">
+      <div class="logo">
+        <img src="../icons/icon48.png" alt="PrepMeet">
+        <h1>PrepMeet</h1>
+      </div>
+      <p class="tagline">Context for your next appointment</p>
+      <button id="btn-signin" class="btn btn-primary">
+        Connect Google Calendar
+      </button>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="loading-screen" class="screen hidden">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Main screen -->
+    <div id="main-screen" class="screen hidden">
+      <header>
+        <img src="../icons/icon16.png" alt="" class="header-icon">
+        <span class="header-title">PrepMeet</span>
+        <button id="btn-settings" class="btn-icon" title="Settings">⚙</button>
+      </header>
+
+      <!-- Upgrade banner (free tier / trial) -->
+      <div id="upgrade-banner" class="upgrade-banner hidden">
+        <div id="upgrade-banner-text"></div>
+        <button id="btn-upgrade" class="btn btn-primary btn-sm">Upgrade</button>
+      </div>
+
+      <!-- Trial gate overlay -->
+      <div id="trial-gate" class="trial-gate hidden">
+        <div class="trial-gate-card">
+          <h2>Your trial has ended</h2>
+          <p>Upgrade to Individual to keep AI prep bullets, voice input, and email summaries.</p>
+          <div class="trial-gate-pricing">
+            <button id="btn-upgrade-monthly" class="btn btn-primary">$9/month</button>
+            <button id="btn-upgrade-yearly" class="btn btn-secondary">$89/year (save 17%)</button>
+          </div>
+          <button id="btn-continue-free" class="btn btn-link">Continue with Free plan</button>
+        </div>
+      </div>
+
+      <!-- No upcoming events -->
+      <div id="no-events" class="content hidden">
+        <p class="empty-state">No upcoming appointments</p>
+        <p class="empty-sub">We'll notify you 5 min before your next meeting</p>
+      </div>
+
+      <!-- Upcoming event card -->
+      <div id="event-card" class="content hidden">
+        <div class="event-header">
+          <h2 id="contact-name"></h2>
+          <span id="event-time" class="event-time"></span>
+        </div>
+        <p id="event-title" class="event-title"></p>
+
+        <!-- AI Prep bullets -->
+        <div id="prep-section" class="prep-section hidden">
+          <ul id="prep-bullets" class="prep-bullets"></ul>
+          <p id="focus-line" class="focus-line"></p>
+        </div>
+
+        <!-- Last note fallback -->
+        <div id="last-note" class="last-note hidden">
+          <p id="last-note-summary"></p>
+          <span id="last-note-date" class="note-date"></span>
+        </div>
+
+        <!-- First session -->
+        <div id="first-session" class="first-session hidden">
+          <p>First session — no prior notes</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button id="btn-got-it" class="btn btn-primary">Got it</button>
+          <button id="btn-snooze" class="btn btn-secondary">Snooze 5min</button>
+          <button id="btn-add-note" class="btn btn-secondary">Add Note</button>
+          <button id="btn-send-summary" class="btn btn-secondary">Send Summary</button>
+          <button id="btn-history" class="btn btn-link">View Full History</button>
+        </div>
+      </div>
+
+      <!-- Email compose -->
+      <div id="email-compose" class="content hidden">
+        <h3>Send Summary</h3>
+        <div id="email-contact-info" class="note-contact"></div>
+        <div class="form-group">
+          <label for="email-to">To</label>
+          <input type="text" id="email-to" placeholder="recipient@example.com">
+        </div>
+        <div class="form-group">
+          <label for="email-cc">Cc (optional)</label>
+          <input type="text" id="email-cc" placeholder="cc@example.com">
+        </div>
+        <div class="form-group">
+          <label for="email-subject">Subject</label>
+          <input type="text" id="email-subject" placeholder="Meeting Summary">
+        </div>
+        <div class="form-group">
+          <label for="email-template">Template</label>
+          <select id="email-template">
+            <option value="standard">Standard</option>
+            <option value="brief">Brief</option>
+            <option value="detailed">Detailed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="email-body">Body</label>
+          <textarea id="email-body" rows="6" placeholder="Summary content..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="email-schedule">Send</label>
+          <select id="email-schedule">
+            <option value="now">Immediately</option>
+            <option value="morning">Next morning (9 AM)</option>
+          </select>
+          <label class="setting-row" style="margin-top:4px;font-size:12px;">
+            <input type="checkbox" id="email-skip-weekend" checked>
+            <span>Skip weekends</span>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="btn-send-email" class="btn btn-primary">Send</button>
+          <button id="btn-cancel-email" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Note capture -->
+      <div id="note-capture" class="content hidden">
+        <h3>Session Notes</h3>
+        <div id="note-contact-info" class="note-contact"></div>
+        <div class="form-group">
+          <label for="note-summary">Summary</label>
+          <input type="text" id="note-summary" placeholder="Brief summary...">
+        </div>
+        <div class="form-group">
+          <label for="note-details">Detailed Notes</label>
+          <textarea id="note-details" rows="6" placeholder="Session details..."></textarea>
+        </div>
+        <div class="form-group">
+          <button id="btn-voice" class="btn btn-icon" title="Voice input">🎤</button>
+        </div>
+        <div class="actions">
+          <button id="btn-save-note" class="btn btn-primary">Save Note</button>
+          <button id="btn-cancel-note" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

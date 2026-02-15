@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "PrepMeet",
+  "version": "0.1.0",
+  "description": "Get 2-bullet context about your next client, 5 minutes before appointments.",
+  "permissions": [
+    "identity",
+    "alarms",
+    "notifications",
+    "storage",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://graph.microsoft.com/*",
+    "https://*.supabase.co/*"
+  ],
+  "oauth2": {
+    "client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/gmail.send",
+      "https://www.googleapis.com/auth/contacts.readonly"
+    ]
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

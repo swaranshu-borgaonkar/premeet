@@ -1,0 +1,28 @@
+[project]
+id = "premeet"
+
+[api]
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+port = 54323
+
+[auth]
+site_url = "https://prepmeet.com"
+additional_redirect_urls = ["chrome-extension://*"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+
+[storage]
+file_size_limit = "50MiB"

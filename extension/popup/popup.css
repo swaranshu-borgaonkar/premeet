@@ -1,0 +1,297 @@
+:root {
+  --brand-color: #2563eb;
+  --brand-color-hover: #1d4ed8;
+  --brand-color-light: #eff6ff;
+  --brand-color-ring: rgba(37, 99, 235, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 400px;
+  min-height: 300px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.hidden { display: none !important; }
+
+/* Screens */
+.screen {
+  padding: 20px;
+}
+
+/* Auth */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.logo h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand-color);
+}
+.tagline {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+.header-icon { width: 16px; height: 16px; }
+.header-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.btn-primary {
+  background: var(--brand-color);
+  color: white;
+}
+.btn-primary:hover { background: var(--brand-color-hover); }
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+.btn-secondary:hover { background: #e5e7eb; }
+.btn-link {
+  background: none;
+  color: var(--brand-color);
+  padding: 8px 0;
+}
+.btn-link:hover { text-decoration: underline; }
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+}
+
+/* Event card */
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.event-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.event-time {
+  font-size: 13px;
+  color: #6b7280;
+}
+.event-title {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+/* Prep bullets */
+.prep-section { margin-bottom: 16px; }
+.prep-bullets {
+  list-style: none;
+  padding: 0;
+}
+.prep-bullets li {
+  padding: 8px 0 8px 20px;
+  position: relative;
+  line-height: 1.4;
+}
+.prep-bullets li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  color: var(--brand-color);
+  font-weight: bold;
+}
+.focus-line {
+  font-style: italic;
+  color: #4b5563;
+  padding: 8px 12px;
+  background: var(--brand-color-light);
+  border-radius: 6px;
+  border-left: 3px solid var(--brand-color);
+}
+
+/* Last note */
+.last-note {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+.note-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* First session */
+.first-session {
+  padding: 16px;
+  text-align: center;
+  color: #6b7280;
+  background: #f9fafb;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* Note capture */
+.note-contact {
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+.form-group {
+  margin-bottom: 12px;
+}
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--brand-color);
+  box-shadow: 0 0 0 2px var(--brand-color-ring);
+}
+
+/* Spinner */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--brand-color);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 40px auto 12px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 30px;
+}
+.empty-sub {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* Voice recording indicator */
+.btn-icon.recording {
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Upgrade banner */
+.upgrade-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #FEF3C7;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #92400E;
+}
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+/* Trial gate overlay */
+.trial-gate {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.trial-gate-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+}
+.trial-gate-card h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.trial-gate-card p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.trial-gate-pricing {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* Disabled button */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

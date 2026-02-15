@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrepMeet Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div id="app">
+    <nav>
+      <div class="nav-brand">
+        <img src="../icons/icon32.png" alt="PrepMeet">
+        <span>PrepMeet</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#settings" class="active">Settings</a></li>
+        <li><a href="#templates">Templates</a></li>
+        <li><a href="#contacts">Contacts</a></li>
+        <li><a href="#account">Account</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <!-- Onboarding -->
+      <section id="onboarding" class="section hidden">
+        <div class="onboarding-card">
+          <div id="step-1" class="step">
+            <h1>Welcome to PrepMeet</h1>
+            <p>Get 2-bullet context about your next client, 5 minutes before appointments.</p>
+            <button class="btn btn-primary" onclick="nextStep(2)">Get Started</button>
+          </div>
+          <div id="step-2" class="step hidden">
+            <h2>Connect Your Calendar</h2>
+            <p>We need access to your calendar to know when your appointments are.</p>
+            <button id="btn-connect-cal" class="btn btn-primary">Connect Google Calendar</button>
+            <button id="btn-connect-microsoft" class="btn btn-secondary" style="margin-top:8px;">Connect Microsoft Outlook</button>
+            <button class="btn btn-link" onclick="nextStep(3)" style="margin-top:8px;">Skip for now</button>
+          </div>
+          <div id="step-3" class="step hidden">
+            <h2>What's your profession?</h2>
+            <div class="profession-grid">
+              <button class="profession-btn" data-profession="therapist">Therapist</button>
+              <button class="profession-btn" data-profession="lawyer">Lawyer</button>
+              <button class="profession-btn" data-profession="doctor">Doctor</button>
+              <button class="profession-btn" data-profession="advisor">Advisor</button>
+              <button class="profession-btn" data-profession="consultant">Consultant</button>
+              <button class="profession-btn" data-profession="other">Other</button>
+            </div>
+          </div>
+          <div id="step-4" class="step hidden">
+            <h2>You're all set!</h2>
+            <p>Your 14-day free trial has started. We'll notify you 5 minutes before your next appointment.</p>
+            <button class="btn btn-primary" onclick="finishOnboarding()">Start Using PrepMeet</button>
+          </div>
+          <div class="step-dots">
+            <span class="dot active" data-step="1"></span>
+            <span class="dot" data-step="2"></span>
+            <span class="dot" data-step="3"></span>
+            <span class="dot" data-step="4"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings" class="section">
+        <h2>Settings</h2>
+        <div class="settings-group">
+          <h3>Notifications</h3>
+          <label class="setting-row">
+            <span>Pre-appointment reminder</span>
+            <select id="reminder-time">
+              <option value="5">5 minutes before</option>
+              <option value="10">10 minutes before</option>
+              <option value="15">15 minutes before</option>
+            </select>
+          </label>
+          <label class="setting-row">
+            <span>Post-session note prompt</span>
+            <input type="checkbox" id="post-session-reminder" checked>
+          </label>
+        </div>
+        <div class="settings-group">
+          <h3>Calendar</h3>
+          <label class="setting-row">
+            <span>Calendar provider</span>
+            <span id="calendar-provider">Google Calendar</span>
+          </label>
+          <label class="setting-row">
+            <span>Timezone</span>
+            <select id="timezone"></select>
+          </label>
+        </div>
+      </section>
+
+      <!-- Email Templates -->
+      <section id="templates" class="section hidden">
+        <h2>Email Templates</h2>
+        <p style="color:#6b7280;margin-bottom:16px;">Customize email templates with placeholders: <code>{{contact_name}}</code>, <code>{{date}}</code>, <code>{{summary}}</code>, <code>{{next_session}}</code></p>
+        <div id="templates-list" class="templates-list"></div>
+        <button id="btn-add-template" class="btn btn-primary" style="margin-top:12px;">+ New Template</button>
+
+        <!-- Template editor (hidden by default) -->
+        <div id="template-editor" class="settings-group hidden" style="margin-top:16px;">
+          <h3 id="template-editor-title">New Template</h3>
+          <div class="form-group-opt">
+            <label>Name</label>
+            <input type="text" id="tpl-name" placeholder="e.g. Follow-up Summary">
+          </div>
+          <div class="form-group-opt">
+            <label>Subject</label>
+            <input type="text" id="tpl-subject" placeholder="Meeting Summary — {{contact_name}}">
+          </div>
+          <div class="form-group-opt">
+            <label>Body</label>
+            <textarea id="tpl-body" rows="8" placeholder="Hi {{contact_name}},&#10;&#10;Here's a summary..."></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="btn-save-template" class="btn btn-primary">Save</button>
+            <button id="btn-cancel-template" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contacts -->
+      <section id="contacts" class="section hidden">
+        <h2>Contacts</h2>
+        <div class="contacts-toolbar">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input type="text" id="contact-search" placeholder="Search contacts..." class="contact-search-input" style="flex:1;">
+            <button id="btn-import-contacts" class="btn btn-secondary">Import</button>
+          </div>
+          <div id="import-status" class="hidden" style="font-size:13px;color:#6b7280;margin-bottom:8px;"></div>
+        </div>
+        <div id="contacts-list" class="contacts-list">
+          <p class="empty-state">Loading contacts...</p>
+        </div>
+      </section>
+
+      <!-- Account -->
+      <section id="account" class="section hidden">
+        <h2>Account</h2>
+        <div class="account-info">
+          <p>Email: <span id="account-email"></span></p>
+          <p>Plan: <span id="account-plan"></span></p>
+          <p>Trial ends: <span id="account-trial"></span></p>
+        </div>
+        <button id="btn-signout" class="btn btn-secondary">Sign Out</button>
+      </section>
+    </main>
+  </div>
+
+  <script src="options.js" type="module"></script>
+</body>
+</html>

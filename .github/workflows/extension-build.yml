@@ -1,0 +1,39 @@
+name: Build Extension
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'extension/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'extension/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate manifest
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8'))"
+
+      - name: Package extension
+        run: |
+          mkdir -p ../dist
+          zip -r ../dist/premeet-extension.zip . -x "*.git*" "node_modules/*" "*.md"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: premeet-extension
+          path: dist/premeet-extension.zip
