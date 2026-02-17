@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
 
 const features = [
   {
@@ -81,16 +83,7 @@ const features = [
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-white">
-      <nav className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              P
-            </div>
-            <span className="font-bold text-xl">PrepMeet</span>
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-20">
@@ -128,6 +121,8 @@ export default function FeaturesPage() {
           </Link>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

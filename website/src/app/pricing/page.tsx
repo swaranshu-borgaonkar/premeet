@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
 
 const plans = [
   {
@@ -52,7 +54,7 @@ const plans = [
       'CSV bulk import',
     ],
     cta: 'Start Team Trial',
-    ctaLink: '/download',
+    ctaLink: '/contact-sales?plan=team',
     highlighted: false,
     minSeats: '3 seat minimum',
   },
@@ -73,7 +75,7 @@ const plans = [
       'Dedicated support',
     ],
     cta: 'Contact Sales',
-    ctaLink: '/enterprise',
+    ctaLink: '/contact-sales?plan=enterprise',
     highlighted: false,
   },
 ];
@@ -81,17 +83,7 @@ const plans = [
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              P
-            </div>
-            <span className="font-bold text-xl">PrepMeet</span>
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-16">
@@ -164,6 +156,8 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

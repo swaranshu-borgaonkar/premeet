@@ -5,8 +5,8 @@
  */
 
 const DEFAULTS = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
+  SUPABASE_URL: 'https://llylsqokznmegiogsrfy.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxseWxzcW9rem5tZWdpb2dzcmZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ0OTUsImV4cCI6MjA4NjY4MDQ5NX0.wJ-uYKjvSUk_FCbaKhlnHo0gS9rmomBMJOdAYztjFag',
   SENTRY_DSN: '',
   REMINDER_MINUTES_BEFORE: 5,
   POST_SESSION_REMINDER_DELAY: 5, // minutes after event ends

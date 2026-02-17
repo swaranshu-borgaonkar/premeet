@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
 
 export default function RoiCalculatorPage() {
   const [professionals, setProfessionals] = useState(10);
@@ -47,23 +49,7 @@ export default function RoiCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              P
-            </div>
-            <span className="font-bold text-xl">PrepMeet</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <Link href="/features" className="hover:text-gray-900 transition">Features</Link>
-            <Link href="/enterprise" className="hover:text-gray-900 transition">Enterprise</Link>
-            <Link href="/pricing" className="hover:text-gray-900 transition">Pricing</Link>
-            <Link href="/security" className="hover:text-gray-900 transition">Security</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-12 text-center">
@@ -318,18 +304,7 @@ export default function RoiCalculatorPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <span>&copy; {new Date().getFullYear()} PrepMeet. All rights reserved.</span>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-gray-700 transition">Privacy</Link>
-            <Link href="/terms" className="hover:text-gray-700 transition">Terms</Link>
-            <Link href="/security" className="hover:text-gray-700 transition">Security</Link>
-            <Link href="/enterprise" className="hover:text-gray-700 transition">Enterprise</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

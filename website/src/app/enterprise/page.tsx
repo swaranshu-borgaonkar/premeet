@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
 
 const features = [
   {
@@ -112,23 +114,7 @@ function DashIcon() {
 export default function EnterprisePage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              P
-            </div>
-            <span className="font-bold text-xl">PrepMeet</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <Link href="/features" className="hover:text-gray-900 transition">Features</Link>
-            <Link href="/pricing" className="hover:text-gray-900 transition">Pricing</Link>
-            <Link href="/security" className="hover:text-gray-900 transition">Security</Link>
-            <Link href="/hipaa" className="hover:text-gray-900 transition">HIPAA</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
@@ -143,12 +129,12 @@ export default function EnterprisePage() {
           Compliance-ready infrastructure for organizations of any size.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="mailto:sales@prepmeet.com"
+          <Link
+            href="/contact-sales?plan=enterprise"
             className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-700 transition"
           >
             Contact Sales
-          </a>
+          </Link>
           <Link
             href="/download"
             className="inline-block border border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-medium hover:bg-gray-50 transition"
@@ -253,12 +239,12 @@ export default function EnterprisePage() {
             Get a personalized demo, volume pricing, and a dedicated onboarding plan for your organization.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="mailto:sales@prepmeet.com"
+            <Link
+              href="/contact-sales?plan=enterprise"
               className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-50 transition"
             >
               Contact Sales
-            </a>
+            </Link>
             <Link
               href="/download"
               className="inline-block border border-white/30 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-white/10 transition"
@@ -269,17 +255,7 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <span>&copy; {new Date().getFullYear()} PrepMeet. All rights reserved.</span>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-gray-700 transition">Privacy</Link>
-            <Link href="/terms" className="hover:text-gray-700 transition">Terms</Link>
-            <Link href="/security" className="hover:text-gray-700 transition">Security</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

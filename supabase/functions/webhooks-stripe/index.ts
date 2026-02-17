@@ -14,7 +14,12 @@ serve(async (req) => {
       return new Response('Missing signature', { status: 401 });
     }
 
-    // TODO: Verify Stripe signature using stripe.webhooks.constructEvent
+    // Verify Stripe webhook signature (HMAC-SHA256)
+    const verified = await verifyStripeSignature(body, signature, STRIPE_WEBHOOK_SECRET);
+    if (!verified) {
+      return new Response('Invalid signature', { status: 401 });
+    }
+
     const event = JSON.parse(body);
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -181,3 +186,39 @@ serve(async (req) => {
     });
   }
 });
+
+async function verifyStripeSignature(
+  body: string,
+  signatureHeader: string,
+  secret: string
+): Promise<boolean> {
+  try {
+    const parts = signatureHeader.split(',');
+    const timestamp = parts.find(p => p.startsWith('t='))?.split('=')[1];
+    const sig = parts.find(p => p.startsWith('v1='))?.split('=')[1];
+
+    if (!timestamp || !sig) return false;
+
+    // Reject if timestamp is older than 5 minutes
+    const age = Math.floor(Date.now() / 1000) - parseInt(timestamp);
+    if (age > 300) return false;
+
+    const payload = `${timestamp}.${body}`;
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+    const expectedSig = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    return expectedSig === sig;
+  } catch {
+    return false;
+  }
+}

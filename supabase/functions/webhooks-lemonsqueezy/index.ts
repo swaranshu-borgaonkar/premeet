@@ -12,7 +12,7 @@ serve(async (req) => {
 
     // Verify webhook signature
     const signature = req.headers.get('x-signature');
-    if (!signature || !verifySignature(body, signature)) {
+    if (!signature || !(await verifySignature(body, signature))) {
       return new Response('Invalid signature', { status: 401 });
     }
 
@@ -113,23 +113,37 @@ serve(async (req) => {
   }
 });
 
-function verifySignature(body: string, signature: string): boolean {
-  const encoder = new TextEncoder();
-  const key = encoder.encode(WEBHOOK_SECRET);
-  const data = encoder.encode(body);
+async function verifySignature(body: string, signature: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(WEBHOOK_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
+    const expectedSig = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
-  const hmac = new Uint8Array(32); // placeholder - use proper HMAC
-  // TODO: Use Web Crypto API for HMAC-SHA256 verification
-  // For now, compare hex digests
-  return true; // Implement proper verification
+    return expectedSig === signature;
+  } catch {
+    return false;
+  }
 }
 
 function getTierFromVariant(variantId: string): string {
-  // Map LemonSqueezy variant IDs to tiers
-  // These will be configured when products are created
-  const variantMap: Record<string, string> = {
-    // individual_monthly: 'individual',
-    // individual_annual: 'individual',
-  };
-  return variantMap[variantId] || 'individual';
+  // Map LemonSqueezy variant IDs to subscription tiers
+  // Variant IDs are set when creating products in LemonSqueezy dashboard
+  // and configured via LEMONSQUEEZY_MONTHLY_VARIANT_ID / LEMONSQUEEZY_YEARLY_VARIANT_ID env vars
+  const monthlyVariant = Deno.env.get('LEMONSQUEEZY_MONTHLY_VARIANT_ID') || '';
+  const yearlyVariant = Deno.env.get('LEMONSQUEEZY_YEARLY_VARIANT_ID') || '';
+
+  const variantMap: Record<string, string> = {};
+  if (monthlyVariant) variantMap[monthlyVariant] = 'individual';
+  if (yearlyVariant) variantMap[yearlyVariant] = 'individual';
+
+  return variantMap[String(variantId)] || 'individual';
 }
