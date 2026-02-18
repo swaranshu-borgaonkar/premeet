@@ -1,14 +1,88 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SecurityPage() {
-  const [ssoProvider, setSsoProvider] = useState('okta');
-  const [connectionId, setConnectionId] = useState('conn_abc123xyz');
-  const [domain, setDomain] = useState('company.com');
-  const [ipAllowlist, setIpAllowlist] = useState('192.168.1.0/24\n10.0.0.0/8');
+  const [ssoProvider, setSsoProvider] = useState('');
+  const [connectionId, setConnectionId] = useState('');
+  const [domain, setDomain] = useState('');
+  const [ipAllowlist, setIpAllowlist] = useState('');
   const [sessionTimeout, setSessionTimeout] = useState('24');
-  const [mfaEnabled, setMfaEnabled] = useState(true);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const res = await fetch('/api/admin/security');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        const s = data.settings || {};
+        setSsoProvider(s.ssoProvider || '');
+        setConnectionId(s.connectionId || '');
+        setDomain(s.domain || '');
+        setIpAllowlist(s.ipAllowlist || '');
+        setSessionTimeout(s.sessionTimeout || '24');
+        setMfaEnabled(s.mfaEnabled || false);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load security settings');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSettings();
+  }, []);
+
+  async function handleSave() {
+    setSaving(true);
+    setSaved(false);
+    try {
+      const res = await fetch('/api/admin/security', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            ssoProvider,
+            connectionId,
+            domain,
+            ipAllowlist,
+            sessionTimeout,
+            mfaEnabled,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to save');
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500 text-sm">Loading security settings...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500 text-sm">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -41,6 +115,7 @@ export default function SecurityPage() {
                 onChange={(e) => setSsoProvider(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
+                <option value="">None</option>
                 <option value="okta">Okta</option>
                 <option value="azure">Azure AD</option>
                 <option value="google">Google Workspace</option>
@@ -69,10 +144,12 @@ export default function SecurityPage() {
               />
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-sm text-green-700 font-medium">SSO Active</span>
-            </div>
+            {ssoProvider && (
+              <div className="flex items-center gap-2 pt-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <span className="text-sm text-green-700 font-medium">SSO Active</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -166,9 +243,16 @@ export default function SecurityPage() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end pt-2">
-          <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
-            Save Changes
+        <div className="flex items-center justify-end gap-3 pt-2">
+          {saved && (
+            <span className="text-sm text-green-600 font-medium">Settings saved successfully</span>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>

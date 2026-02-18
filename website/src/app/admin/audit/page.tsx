@@ -1,19 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const mockLogs = [
-  { id: 1, timestamp: '2026-02-14 09:42:18', user: 'Dr. Sarah Chen', action: 'user.login', resource: 'Session', details: 'SSO login via Okta' },
-  { id: 2, timestamp: '2026-02-14 09:38:05', user: 'Mark Thompson', action: 'note.create', resource: 'Note #4821', details: 'Created pre-appointment note for client J. Smith' },
-  { id: 3, timestamp: '2026-02-14 09:15:33', user: 'Admin User', action: 'user.invite', resource: 'User', details: 'Invited anna.k@medgroup.com as Member' },
-  { id: 4, timestamp: '2026-02-14 08:52:11', user: 'Lisa Park', action: 'workspace.update', resource: 'Cardiology Team', details: 'Updated workspace settings' },
-  { id: 5, timestamp: '2026-02-14 08:30:44', user: 'Admin User', action: 'security.update', resource: 'SSO Config', details: 'Updated identity provider to Okta' },
-  { id: 6, timestamp: '2026-02-13 17:20:09', user: 'James Wilson', action: 'export.create', resource: 'Audit Logs', details: 'Exported audit logs as CSV' },
-  { id: 7, timestamp: '2026-02-13 16:45:22', user: 'Emily Davis', action: 'billing.update', resource: 'Subscription', details: 'Changed plan from Team to Enterprise' },
-  { id: 8, timestamp: '2026-02-13 15:10:38', user: 'Robert Martinez', action: 'note.delete', resource: 'Note #4790', details: 'Deleted draft note' },
-  { id: 9, timestamp: '2026-02-13 14:05:51', user: 'Admin User', action: 'user.suspend', resource: 'User', details: 'Suspended r.martinez@legal.io' },
-  { id: 10, timestamp: '2026-02-13 11:22:17', user: 'Anna Kowalski', action: 'user.login', resource: 'Session', details: 'Password login with MFA' },
-];
+interface AuditLog {
+  id: string;
+  timestamp: string;
+  user: string;
+  action: string;
+  resource: string;
+  details: string;
+}
 
 const actionColors: Record<string, string> = {
   'user.login': 'bg-blue-50 text-blue-700',
@@ -27,19 +23,70 @@ const actionColors: Record<string, string> = {
   'billing.update': 'bg-pink-50 text-pink-700',
 };
 
+function formatTimestamp(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    return d.toISOString().replace('T', ' ').substring(0, 19);
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function AuditPage() {
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [actionFilter, setActionFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filteredLogs = mockLogs.filter((log) => {
-    const matchesAction = actionFilter === 'all' || log.action.startsWith(actionFilter);
-    const matchesSearch =
-      search === '' ||
-      log.user.toLowerCase().includes(search.toLowerCase()) ||
-      log.action.toLowerCase().includes(search.toLowerCase()) ||
-      log.details.toLowerCase().includes(search.toLowerCase());
-    return matchesAction && matchesSearch;
+  useEffect(() => {
+    fetchLogs();
+  }, [actionFilter]);
+
+  async function fetchLogs() {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (actionFilter !== 'all') params.set('action', actionFilter);
+      if (search) params.set('search', search);
+      const res = await fetch(`/api/admin/audit?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      setLogs(data.logs || []);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load audit logs');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Client-side search filtering
+  const filteredLogs = logs.filter((log) => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return (
+      log.user.toLowerCase().includes(s) ||
+      log.action.toLowerCase().includes(s) ||
+      log.details.toLowerCase().includes(s)
+    );
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500 text-sm">Loading audit logs...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500 text-sm">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -113,29 +160,39 @@ export default function AuditPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 text-sm text-gray-500 font-mono whitespace-nowrap">{log.timestamp}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-[10px] flex-shrink-0">
-                        {log.user
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                      </div>
-                      <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{log.user}</span>
-                    </div>
+              {filteredLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-400">
+                    No audit logs found.
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`text-xs font-mono font-medium px-2.5 py-1 rounded-full ${actionColors[log.action] || 'bg-gray-100 text-gray-700'}`}>
-                      {log.action}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{log.resource}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{log.details}</td>
                 </tr>
-              ))}
+              ) : (
+                filteredLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 text-sm text-gray-500 font-mono whitespace-nowrap">{formatTimestamp(log.timestamp)}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-[10px] flex-shrink-0">
+                          {log.user
+                            .split(' ')
+                            .map((n: string) => n[0])
+                            .join('')
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{log.user}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`text-xs font-mono font-medium px-2.5 py-1 rounded-full ${actionColors[log.action] || 'bg-gray-100 text-gray-700'}`}>
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{log.resource}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{log.details}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -143,7 +200,7 @@ export default function AuditPage() {
         {/* Table Footer */}
         <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-500">
-            Showing {filteredLogs.length} of {mockLogs.length} entries
+            Showing {filteredLogs.length} of {logs.length} entries
           </p>
           <div className="flex items-center gap-2">
             <button className="px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-50" disabled>

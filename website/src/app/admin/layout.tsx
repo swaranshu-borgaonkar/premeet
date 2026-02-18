@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: DashboardIcon },
@@ -71,6 +72,39 @@ function AuditIcon() {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [adminName, setAdminName] = useState('Admin');
+  const [adminEmail, setAdminEmail] = useState('');
+
+  useEffect(() => {
+    async function fetchAdmin() {
+      try {
+        const res = await fetch('/api/admin/users');
+        if (!res.ok) return;
+        const data = await res.json();
+        const users = data.users || [];
+        // Find an admin user (first user with admin role in workspace_members, or just the first user)
+        const admin = users.find(
+          (u: Record<string, unknown>) =>
+            Array.isArray(u.workspace_members) &&
+            u.workspace_members.some((wm: Record<string, unknown>) => wm.role === 'admin')
+        ) || users[0];
+        if (admin) {
+          setAdminName(admin.full_name || 'Admin');
+          setAdminEmail(admin.email || '');
+        }
+      } catch {
+        // Keep defaults
+      }
+    }
+    fetchAdmin();
+  }, []);
+
+  const initials = adminName
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'A';
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -116,11 +150,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="px-4 py-4 border-t border-gray-100">
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-sm">
-              A
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
-              <p className="text-xs text-gray-500 truncate">admin@company.com</p>
+              <p className="text-sm font-medium text-gray-900 truncate">{adminName}</p>
+              <p className="text-xs text-gray-500 truncate">{adminEmail}</p>
             </div>
           </div>
         </div>
