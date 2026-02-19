@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { StatCardSkeleton, ActivityListSkeleton } from '@/components/admin-skeleton';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface StatsData {
   users: number;
@@ -37,7 +39,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const res = await fetch('/api/admin/stats');
+        const res = await adminFetch('/api/admin/stats');
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setStats(data.stats);
@@ -96,8 +98,21 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500 text-sm">Loading dashboard...</div>
+      <div>
+        <div className="mb-8">
+          <div className="h-7 bg-gray-200 rounded w-32 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-64 animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActivityListSkeleton />
+          <ActivityListSkeleton />
+        </div>
       </div>
     );
   }

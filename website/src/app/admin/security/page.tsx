@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 export default function SecurityPage() {
   const [ssoProvider, setSsoProvider] = useState('');
@@ -17,7 +18,7 @@ export default function SecurityPage() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/admin/security');
+        const res = await adminFetch('/api/admin/security');
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         const s = data.settings || {};
@@ -41,7 +42,7 @@ export default function SecurityPage() {
     setSaving(true);
     setSaved(false);
     try {
-      const res = await fetch('/api/admin/security', {
+      const res = await adminFetch('/api/admin/security', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

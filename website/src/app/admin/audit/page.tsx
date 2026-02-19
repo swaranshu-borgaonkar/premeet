@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { TableSkeleton } from '@/components/admin-skeleton';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface AuditLog {
   id: string;
@@ -49,7 +51,7 @@ export default function AuditPage() {
       const params = new URLSearchParams();
       if (actionFilter !== 'all') params.set('action', actionFilter);
       if (search) params.set('search', search);
-      const res = await fetch(`/api/admin/audit?${params.toString()}`);
+      const res = await adminFetch(`/api/admin/audit?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setLogs(data.logs || []);
@@ -74,8 +76,12 @@ export default function AuditPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500 text-sm">Loading audit logs...</div>
+      <div>
+        <div className="mb-8">
+          <div className="h-7 bg-gray-200 rounded w-28 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-72 animate-pulse" />
+        </div>
+        <TableSkeleton />
       </div>
     );
   }

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { TableSkeleton } from '@/components/admin-skeleton';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface WorkspaceMember {
   workspace_id: string;
@@ -55,7 +57,7 @@ export default function UsersPage() {
   async function fetchUsers() {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/users');
+      const res = await adminFetch('/api/admin/users');
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setUsers(data.users || []);
@@ -71,7 +73,7 @@ export default function UsersPage() {
     if (!newUserName || !newUserEmail) return;
     setInviting(true);
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await adminFetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ full_name: newUserName, email: newUserEmail, role: newUserRole }),
@@ -107,8 +109,12 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500 text-sm">Loading users...</div>
+      <div>
+        <div className="mb-8">
+          <div className="h-7 bg-gray-200 rounded w-24 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-64 animate-pulse" />
+        </div>
+        <TableSkeleton />
       </div>
     );
   }

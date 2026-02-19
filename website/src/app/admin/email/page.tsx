@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 export default function EmailConfigPage() {
   const [smtpHost, setSmtpHost] = useState('');
@@ -16,7 +17,7 @@ export default function EmailConfigPage() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/admin/security');
+        const res = await adminFetch('/api/admin/security');
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         const emailConfig = data.settings?.emailConfig || {};
@@ -40,11 +41,11 @@ export default function EmailConfigPage() {
     setSaved(false);
     try {
       // First fetch existing settings so we don't overwrite security settings
-      const fetchRes = await fetch('/api/admin/security');
+      const fetchRes = await adminFetch('/api/admin/security');
       const existing = await fetchRes.json();
       const existingSettings = existing.settings || {};
 
-      const res = await fetch('/api/admin/security', {
+      const res = await adminFetch('/api/admin/security', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

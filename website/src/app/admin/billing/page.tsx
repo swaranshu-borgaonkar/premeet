@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface StripeCustomer {
   id: string;
@@ -38,7 +39,7 @@ export default function BillingPage() {
   useEffect(() => {
     async function fetchBilling() {
       try {
-        const res = await fetch('/api/admin/billing');
+        const res = await adminFetch('/api/admin/billing');
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setCustomers(data.customers || []);

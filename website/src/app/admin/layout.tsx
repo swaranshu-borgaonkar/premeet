@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { createBrowserClient } from '@/lib/supabase-browser';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: DashboardIcon },
@@ -70,34 +71,96 @@ function AuditIcon() {
   );
 }
 
+function SignOutIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+    </svg>
+  );
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [adminName, setAdminName] = useState('Admin');
+  const router = useRouter();
+  const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  // Skip auth check for the login page itself
+  const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
-    async function fetchAdmin() {
-      try {
-        const res = await fetch('/api/admin/users');
-        if (!res.ok) return;
-        const data = await res.json();
-        const users = data.users || [];
-        // Find an admin user (first user with admin role in workspace_members, or just the first user)
-        const admin = users.find(
-          (u: Record<string, unknown>) =>
-            Array.isArray(u.workspace_members) &&
-            u.workspace_members.some((wm: Record<string, unknown>) => wm.role === 'admin')
-        ) || users[0];
-        if (admin) {
-          setAdminName(admin.full_name || 'Admin');
-          setAdminEmail(admin.email || '');
-        }
-      } catch {
-        // Keep defaults
-      }
+    if (isLoginPage) {
+      setAuthChecked(true);
+      setIsAuthenticated(true); // Let the login page render
+      return;
     }
-    fetchAdmin();
-  }, []);
+
+    const supabase = createBrowserClient();
+
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace('/admin/login');
+        return;
+      }
+
+      // Set user info from session
+      const user = session.user;
+      const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin';
+      setAdminName(fullName);
+      setAdminEmail(user.email || '');
+      setIsAuthenticated(true);
+      setAuthChecked(true);
+    }
+
+    checkAuth();
+
+    // Listen for auth state changes (handles token refresh, sign out in other tabs, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        router.replace('/admin/login');
+      }
+      if (event === 'TOKEN_REFRESHED' && session) {
+        const user = session.user;
+        const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin';
+        setAdminName(fullName);
+        setAdminEmail(user.email || '');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [isLoginPage, router]);
+
+  // Login page gets rendered without the admin shell
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  // Show loading state while checking auth
+  if (!authChecked || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-3">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg" />
+          <div className="h-4 w-32 bg-gray-200 rounded" />
+          <p className="text-sm text-gray-400 mt-2">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    const supabase = createBrowserClient();
+    await supabase.auth.signOut();
+    router.replace('/admin/login');
+  }
 
   const initials = adminName
     .split(' ')
@@ -157,6 +220,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="text-xs text-gray-500 truncate">{adminEmail}</p>
             </div>
           </div>
+          <button
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <SignOutIcon />
+            {signingOut ? 'Signing out...' : 'Sign out'}
+          </button>
         </div>
       </aside>
 

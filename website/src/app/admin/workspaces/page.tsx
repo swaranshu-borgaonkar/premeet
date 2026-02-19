@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CardGridSkeleton } from '@/components/admin-skeleton';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface Workspace {
   id: string;
@@ -37,7 +39,7 @@ export default function WorkspacesPage() {
   async function fetchWorkspaces() {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/workspaces');
+      const res = await adminFetch('/api/admin/workspaces');
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setWorkspaces(data.workspaces || []);
@@ -53,7 +55,7 @@ export default function WorkspacesPage() {
     if (!newName) return;
     setCreating(true);
     try {
-      const res = await fetch('/api/admin/workspaces', {
+      const res = await adminFetch('/api/admin/workspaces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName, description: newDescription }),
@@ -75,8 +77,12 @@ export default function WorkspacesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500 text-sm">Loading workspaces...</div>
+      <div>
+        <div className="mb-8">
+          <div className="h-7 bg-gray-200 rounded w-32 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-64 animate-pulse" />
+        </div>
+        <CardGridSkeleton />
       </div>
     );
   }
