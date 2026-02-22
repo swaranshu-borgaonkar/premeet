@@ -1,6 +1,6 @@
 import { captureException } from './sentry.js';
 import { putToStore, getAllFromStore } from './cache.js';
-import { upsertContact, findContactByEmail as findContactByEmailRemote } from './supabase.js';
+import { upsertContact, findContactByEmail as findContactByEmailRemote, transferNotesToContact } from './supabase.js';
 
 /**
  * Auto-discover contacts from calendar event attendees.
@@ -142,16 +142,30 @@ export async function mergeContacts(primaryId, secondaryId) {
     // Save merged primary
     await upsertContact(primary);
 
-    // TODO: Transfer notes from secondary to primary (requires Supabase call)
-    // For now, store merge info for sync queue
-    const { addToSyncQueue } = await import('./cache.js');
+    // Transfer all notes from secondary contact to primary contact.
+    // If this fails, we abort the merge so notes are not orphaned.
+    try {
+      await transferNotesToContact(secondaryId, primaryId);
+    } catch (transferError) {
+      captureException(transferError, {
+        context: 'mergeContacts:transferNotes',
+        primaryId,
+        secondaryId,
+      });
+      throw new Error(
+        `Note transfer failed during merge — secondary contact ${secondaryId} was not deleted. ` +
+        `Cause: ${transferError.message}`
+      );
+    }
+
+    // Record the merge operation in the sync queue for audit / offline replay
+    const { addToSyncQueue, deleteFromStore } = await import('./cache.js');
     await addToSyncQueue('contacts', secondaryId, 'merge', {
       primary_id: primaryId,
       secondary_id: secondaryId,
     });
 
     // Remove secondary from local cache
-    const { deleteFromStore } = await import('./cache.js');
     await deleteFromStore('contacts', secondaryId);
 
     return primary;

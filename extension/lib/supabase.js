@@ -208,6 +208,52 @@ export async function getNotesForUser(userId, limit = 50) {
   }
 }
 
+/**
+ * Transfer all notes from one contact to another (used during merge).
+ * Updates contact_id on all notes belonging to sourceContactId.
+ * Returns the list of transferred notes, or throws on failure.
+ */
+export async function transferNotesToContact(sourceContactId, targetContactId) {
+  const { getAllFromStore } = await import('./cache.js');
+
+  if (!navigator.onLine) {
+    // Offline: update local cache and queue for later sync
+    const allNotes = await getAllFromStore('notes');
+    const notesToTransfer = allNotes.filter(n => n.contact_id === sourceContactId);
+
+    for (const note of notesToTransfer) {
+      note.contact_id = targetContactId;
+      note.updated_at = new Date().toISOString();
+      await putToStore('notes', note);
+      await addToSyncQueue('notes', note.id, 'update', {
+        contact_id: targetContactId,
+        updated_at: note.updated_at,
+      });
+    }
+
+    return notesToTransfer;
+  }
+
+  // Online: batch-update in Supabase, then update local cache
+  const transferred = await supabaseRequest(
+    `notes?contact_id=eq.${sourceContactId}`,
+    {
+      method: 'PATCH',
+      body: {
+        contact_id: targetContactId,
+        updated_at: new Date().toISOString(),
+      },
+    }
+  );
+
+  // Update local cache to reflect the transfer
+  for (const note of transferred || []) {
+    await putToStore('notes', note);
+  }
+
+  return transferred || [];
+}
+
 // ─── Prep Cache ────────────────────────────────────────────
 
 /**

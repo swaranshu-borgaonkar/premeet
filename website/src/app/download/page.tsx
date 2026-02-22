@@ -7,6 +7,22 @@ export const metadata: Metadata = {
   title: 'Download PrepMeet for Chrome — Free Browser Extension',
   description:
     'Install the PrepMeet Chrome extension to get pre-appointment context about your next client, 5 minutes before meetings. Free for therapists, lawyers, doctors, and advisors.',
+  alternates: {
+    canonical: 'https://prepmeet.com/download',
+  },
+  openGraph: {
+    title: 'Download PrepMeet for Chrome — Free Browser Extension',
+    description:
+      'Install the PrepMeet Chrome extension and get pre-appointment context about your next client, 5 minutes before meetings.',
+    url: 'https://prepmeet.com/download',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Download PrepMeet — Free Chrome Extension',
+    description:
+      'Get pre-appointment context about your next client, 5 minutes before meetings. Free for therapists, lawyers, doctors, and advisors.',
+  },
 };
 
 const CHROME_STORE_URL =

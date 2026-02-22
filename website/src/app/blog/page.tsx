@@ -1,11 +1,28 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'Blog — PrepMeet',
+export const metadata: Metadata = {
+  title: 'Blog — Insights for Service Professionals',
   description:
     'Insights on session preparation, client management, AI for service professionals, and practice growth from the PrepMeet team.',
+  alternates: {
+    canonical: 'https://prepmeet.com/blog',
+  },
+  openGraph: {
+    title: 'PrepMeet Blog — Insights for Service Professionals',
+    description:
+      'Insights on session preparation, client management, AI for service professionals, and practice growth.',
+    url: 'https://prepmeet.com/blog',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PrepMeet Blog',
+    description:
+      'Insights on session preparation, client management, AI for service professionals, and practice growth.',
+  },
 };
 
 const posts = [

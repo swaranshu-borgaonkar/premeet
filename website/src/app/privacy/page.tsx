@@ -1,8 +1,27 @@
+import type { Metadata } from 'next';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'Privacy Policy — PrepMeet',
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description:
+    'Learn how PrepMeet collects, uses, and protects your data. We are committed to transparency and safeguarding client information for service professionals.',
+  alternates: {
+    canonical: 'https://prepmeet.com/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy — PrepMeet',
+    description:
+      'Learn how PrepMeet collects, uses, and protects your data. Committed to transparency and safeguarding client information.',
+    url: 'https://prepmeet.com/privacy',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy — PrepMeet',
+    description:
+      'Learn how PrepMeet collects, uses, and protects your data.',
+  },
 };
 
 export default function PrivacyPage() {

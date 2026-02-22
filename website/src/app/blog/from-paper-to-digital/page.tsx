@@ -1,11 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'Making the Switch: From Paper Notes to Digital Client Management — PrepMeet',
+export const metadata: Metadata = {
+  title: 'Making the Switch: From Paper Notes to Digital Client Management',
   description:
     'A practical, low-stress guide for service professionals transitioning from paper-based systems to digital client management tools.',
+  alternates: {
+    canonical: 'https://prepmeet.com/blog/from-paper-to-digital',
+  },
+  openGraph: {
+    title: 'From Paper Notes to Digital Client Management',
+    description:
+      'A practical guide for service professionals transitioning from paper-based systems to digital client management tools.',
+    url: 'https://prepmeet.com/blog/from-paper-to-digital',
+    type: 'article',
+    publishedTime: '2026-01-14T00:00:00Z',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'From Paper Notes to Digital Client Management',
+    description:
+      'A practical guide for transitioning from paper-based systems to digital client management.',
+  },
 };
 
 export default function FromPaperToDigitalPage() {

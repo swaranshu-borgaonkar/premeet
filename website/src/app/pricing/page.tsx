@@ -1,6 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+
+export const metadata: Metadata = {
+  title: 'Pricing — Free, Individual & Team Plans',
+  description:
+    'PrepMeet pricing starts free for solo practitioners. Individual plans at $9/mo with AI prep bullets. Team and Enterprise plans for organizations with HIPAA compliance.',
+  alternates: {
+    canonical: 'https://prepmeet.com/pricing',
+  },
+  openGraph: {
+    title: 'Pricing — Free, Individual & Team Plans',
+    description:
+      'PrepMeet pricing starts free for solo practitioners. Individual plans at $9/mo with AI prep bullets. Team and Enterprise plans for organizations.',
+    url: 'https://prepmeet.com/pricing',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PrepMeet Pricing — Plans for Every Practice Size',
+    description:
+      'Free for solo practitioners. $9/mo for AI-powered prep. Team and Enterprise plans available.',
+  },
+};
 
 const plans = [
   {

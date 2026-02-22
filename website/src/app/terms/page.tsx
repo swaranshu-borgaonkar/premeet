@@ -1,8 +1,27 @@
+import type { Metadata } from 'next';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'Terms of Service — PrepMeet',
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description:
+    'Review the terms and conditions governing your use of PrepMeet, the pre-appointment context tool for service professionals.',
+  alternates: {
+    canonical: 'https://prepmeet.com/terms',
+  },
+  openGraph: {
+    title: 'Terms of Service — PrepMeet',
+    description:
+      'Terms and conditions governing your use of PrepMeet.',
+    url: 'https://prepmeet.com/terms',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service — PrepMeet',
+    description:
+      'Terms and conditions governing your use of PrepMeet.',
+  },
 };
 
 export default function TermsPage() {

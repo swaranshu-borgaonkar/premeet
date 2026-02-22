@@ -1,11 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'How AI Is Quietly Revolutionizing Service Professions — PrepMeet',
+export const metadata: Metadata = {
+  title: 'How AI Is Quietly Revolutionizing Service Professions',
   description:
     'AI tools are not just for tech workers. Learn how therapists, lawyers, doctors, and financial advisors are using AI to work smarter without sacrificing the human touch.',
+  alternates: {
+    canonical: 'https://prepmeet.com/blog/ai-for-service-professionals',
+  },
+  openGraph: {
+    title: 'How AI Is Quietly Revolutionizing Service Professions',
+    description:
+      'Learn how therapists, lawyers, doctors, and financial advisors are using AI to work smarter without sacrificing the human touch.',
+    url: 'https://prepmeet.com/blog/ai-for-service-professionals',
+    type: 'article',
+    publishedTime: '2026-02-05T00:00:00Z',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'How AI Is Revolutionizing Service Professions',
+    description:
+      'Learn how therapists, lawyers, and doctors are using AI to work smarter without sacrificing the human touch.',
+  },
 };
 
 export default function AiForServiceProfessionalsPage() {

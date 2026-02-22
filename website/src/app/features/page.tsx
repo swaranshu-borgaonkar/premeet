@@ -1,6 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+
+export const metadata: Metadata = {
+  title: 'Features — AI-Powered Pre-Appointment Context',
+  description:
+    'AI prep bullets, smart calendar sync, quick session notes, voice input, team workspaces, and HIPAA-eligible deployment. Everything you need to stay prepared for every client meeting.',
+  alternates: {
+    canonical: 'https://prepmeet.com/features',
+  },
+  openGraph: {
+    title: 'Features — AI-Powered Pre-Appointment Context',
+    description:
+      'AI prep bullets, smart calendar sync, quick session notes, voice input, team workspaces, and HIPAA-eligible deployment.',
+    url: 'https://prepmeet.com/features',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PrepMeet Features — Everything for Pre-Appointment Prep',
+    description:
+      'AI-generated prep bullets, calendar sync, voice notes, team workspaces, and HIPAA compliance.',
+  },
+};
 
 const features = [
   {

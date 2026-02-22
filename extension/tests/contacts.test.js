@@ -30,6 +30,7 @@ vi.mock('../lib/cache.js', () => {
 vi.mock('../lib/supabase.js', () => ({
   upsertContact: vi.fn(async (contact) => contact),
   findContactByEmail: vi.fn(async () => null),
+  transferNotesToContact: vi.fn(async () => {}),
 }));
 
 // Mock chrome.storage.local

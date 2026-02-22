@@ -1,11 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'A Guide to HIPAA-Compliant Digital Note-Taking for Healthcare Providers — PrepMeet',
+export const metadata: Metadata = {
+  title: 'A Guide to HIPAA-Compliant Digital Note-Taking for Healthcare Providers',
   description:
     'Going digital with clinical notes does not have to be a compliance nightmare. Learn what HIPAA requires and how to evaluate tools that meet the standard.',
+  alternates: {
+    canonical: 'https://prepmeet.com/blog/hipaa-compliant-note-taking',
+  },
+  openGraph: {
+    title: 'A Guide to HIPAA-Compliant Digital Note-Taking',
+    description:
+      'Going digital with clinical notes does not have to be a compliance nightmare. Learn what HIPAA requires.',
+    url: 'https://prepmeet.com/blog/hipaa-compliant-note-taking',
+    type: 'article',
+    publishedTime: '2026-01-20T00:00:00Z',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HIPAA-Compliant Digital Note-Taking Guide',
+    description:
+      'Learn what HIPAA requires and how to evaluate digital note-taking tools that meet the standard.',
+  },
 };
 
 export default function HipaaCompliantNoteTakingPage() {

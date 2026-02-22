@@ -1,11 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: 'Why 2 Minutes of Session Prep Can Transform Your Client Relationships — PrepMeet',
+export const metadata: Metadata = {
+  title: 'Why 2 Minutes of Session Prep Can Transform Your Client Relationships',
   description:
     'Discover how brief pre-session preparation improves outcomes for therapists, lawyers, doctors, and other service professionals.',
+  alternates: {
+    canonical: 'https://prepmeet.com/blog/why-session-prep-matters',
+  },
+  openGraph: {
+    title: 'Why 2 Minutes of Session Prep Can Transform Your Client Relationships',
+    description:
+      'Discover how brief pre-session preparation improves outcomes for therapists, lawyers, doctors, and other service professionals.',
+    url: 'https://prepmeet.com/blog/why-session-prep-matters',
+    type: 'article',
+    publishedTime: '2026-02-12T00:00:00Z',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Why 2 Minutes of Session Prep Can Transform Client Relationships',
+    description:
+      'Brief pre-session preparation improves outcomes for therapists, lawyers, doctors, and other service professionals.',
+  },
 };
 
 export default function WhySessionPrepMattersPage() {

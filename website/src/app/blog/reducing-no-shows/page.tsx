@@ -1,11 +1,29 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 
-export const metadata = {
-  title: '5 Proven Strategies to Reduce Client No-Shows — PrepMeet',
+export const metadata: Metadata = {
+  title: '5 Proven Strategies to Reduce Client No-Shows',
   description:
     'No-shows cost service professionals thousands each year. Here are five evidence-based strategies to reduce missed appointments and improve client retention.',
+  alternates: {
+    canonical: 'https://prepmeet.com/blog/reducing-no-shows',
+  },
+  openGraph: {
+    title: '5 Proven Strategies to Reduce Client No-Shows',
+    description:
+      'No-shows cost service professionals thousands each year. Five evidence-based strategies to reduce missed appointments.',
+    url: 'https://prepmeet.com/blog/reducing-no-shows',
+    type: 'article',
+    publishedTime: '2026-01-28T00:00:00Z',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '5 Proven Strategies to Reduce Client No-Shows',
+    description:
+      'Evidence-based strategies to reduce missed appointments and improve client retention.',
+  },
 };
 
 export default function ReducingNoShowsPage() {

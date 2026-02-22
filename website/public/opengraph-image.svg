@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1200" height="8" fill="#2563EB"/>
+  <rect x="80" y="200" width="80" height="80" rx="16" fill="#2563EB"/>
+  <text x="180" y="262" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="700" fill="#111827">PrepMeet</text>
+  <text x="80" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="36" fill="#4B5563">Pre-appointment context for service professionals.</text>
+  <text x="80" y="410" font-family="system-ui, -apple-system, sans-serif" font-size="36" fill="#4B5563">2-bullet summaries, 5 minutes before every meeting.</text>
+  <text x="80" y="540" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#9CA3AF">prepmeet.com</text>
+  <text x="120" y="248" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="700" fill="white" text-anchor="middle">P</text>
+</svg>
