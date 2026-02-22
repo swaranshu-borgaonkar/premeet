@@ -15,6 +15,11 @@ import {
 } from './lib/workspace.js';
 import { findContactByEmail, findContactById, searchContacts, discoverContacts } from './lib/contacts.js';
 import { getAllFromStore } from './lib/cache.js';
+import { encryptToken } from './lib/token-encryption.js';
+import { getConfig } from './lib/config.js';
+import { getAccessToken } from './lib/auth.js';
+import { importMicrosoftContacts } from './lib/contacts-microsoft.js';
+import { fetchEventsForDay } from './lib/calendar.js';
 
 // Initialize error tracking
 initSentry();
@@ -148,8 +153,6 @@ async function handleMessage(message, sender) {
 
     case 'STORE_SESSION': {
       // Store session data from popup auth flow
-      const { encryptToken } = await import('./lib/token-encryption.js');
-      const { getConfig } = await import('./lib/config.js');
       const config = await getConfig();
       const session = message.session;
       const googleToken = message.googleToken;
@@ -278,13 +281,13 @@ async function handleMessage(message, sender) {
       const { calendarProvider } = await chrome.storage.local.get('calendarProvider');
 
       if (calendarProvider === 'microsoft') {
-        const { importMicrosoftContacts } = await import('./lib/contacts-microsoft.js');
+        // importMicrosoftContacts already imported at top
         return await importMicrosoftContacts(user.id);
       }
 
       // For Google, contacts are auto-discovered from calendar events
       // Trigger a full calendar scan to discover contacts
-      const { fetchEventsForDay } = await import('./lib/calendar.js');
+      // fetchEventsForDay already imported at top
       const now = new Date();
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       try {
@@ -378,8 +381,7 @@ async function handleMessage(message, sender) {
     case 'GET_EMAIL_TEMPLATES': {
       if (!user) return [];
       try {
-        const { getAccessToken } = await import('./lib/auth.js');
-        const config = await (await import('./lib/config.js')).getConfig();
+        const config = await getConfig();
         const token = await getAccessToken();
         const response = await fetch(
           `${config.SUPABASE_URL}/rest/v1/email_templates?user_id=eq.${user.id}&order=name.asc`,
@@ -401,8 +403,7 @@ async function handleMessage(message, sender) {
     case 'SAVE_EMAIL_TEMPLATE': {
       if (!user) return { error: 'Not authenticated' };
       try {
-        const { getAccessToken } = await import('./lib/auth.js');
-        const config = await (await import('./lib/config.js')).getConfig();
+        const config = await getConfig();
         const token = await getAccessToken();
         const payload = {
           ...message.payload,
@@ -434,8 +435,7 @@ async function handleMessage(message, sender) {
     case 'DELETE_EMAIL_TEMPLATE': {
       if (!user) return { error: 'Not authenticated' };
       try {
-        const { getAccessToken } = await import('./lib/auth.js');
-        const config = await (await import('./lib/config.js')).getConfig();
+        const config = await getConfig();
         const token = await getAccessToken();
         await fetch(
           `${config.SUPABASE_URL}/rest/v1/email_templates?id=eq.${message.templateId}&user_id=eq.${user.id}`,
@@ -481,8 +481,8 @@ async function handleMessage(message, sender) {
           return { success: true };
         } else {
           // Schedule via edge function
-          const config = await (await import('./lib/config.js')).getConfig();
-          const token = await (await import('./lib/auth.js')).getAccessToken();
+          const config = await getConfig();
+          const token = await getAccessToken();
 
           const response = await fetch(
             `${config.SUPABASE_URL}/functions/v1/email-schedule`,
@@ -630,7 +630,7 @@ async function batchPreGeneratePreps() {
     if (!profile || (profile.subscription_tier === 'free' && !isInTrial(profile))) return;
 
     // Fetch tomorrow's events from cache
-    const { getAllFromStore: getAll } = await import('./lib/cache.js');
+    const getAll = getAllFromStore;
     const events = await getAll('calendar_events');
 
     const now = new Date();
