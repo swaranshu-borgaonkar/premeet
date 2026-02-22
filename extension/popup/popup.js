@@ -52,7 +52,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('btn-signin').addEventListener('click', async () => {
   showScreen('loading');
   try {
-    const result = await sendMessage({ type: 'SIGN_IN_GOOGLE' });
+    // Get Google token from popup context (has user gesture)
+    const googleToken = await new Promise((resolve, reject) => {
+      chrome.identity.getAuthToken({ interactive: true }, (token) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          resolve(token);
+        }
+      });
+    });
+
+    if (!googleToken) {
+      throw new Error('No token received from Google');
+    }
+
+    // Send token to background for Supabase exchange
+    const result = await sendMessage({ type: 'SIGN_IN_GOOGLE', googleToken });
     if (result && result.error) {
       throw new Error(result.error);
     }

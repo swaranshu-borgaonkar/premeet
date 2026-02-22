@@ -6,21 +6,23 @@ import { getConfig } from './config.js';
 /**
  * Sign in with Google via Chrome Identity API
  */
-export async function signInWithGoogle() {
+export async function signInWithGoogle(googleToken) {
   try {
     const config = await getConfig();
-    const identity = getIdentityAPI();
 
-    // Get Google access token via Chrome Identity API
-    const googleToken = await new Promise((resolve, reject) => {
-      identity.getAuthToken({ interactive: true }, (token) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(token);
-        }
+    // If no token passed, try getting one (non-interactive, for background refresh)
+    if (!googleToken) {
+      const identity = getIdentityAPI();
+      googleToken = await new Promise((resolve, reject) => {
+        identity.getAuthToken({ interactive: false }, (token) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(token);
+          }
+        });
       });
-    });
+    }
 
     // Exchange Google access token for Supabase session via our edge function
     const response = await fetch(`${config.SUPABASE_URL}/functions/v1/auth-google-exchange`, {

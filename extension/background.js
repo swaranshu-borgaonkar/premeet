@@ -144,7 +144,7 @@ async function handleMessage(message, sender) {
   switch (message.type) {
     // ── Auth ──
     case 'SIGN_IN_GOOGLE':
-      return await signInWithGoogle();
+      return await signInWithGoogle(message.googleToken);
 
     case 'SIGN_IN_MICROSOFT':
       return await signInWithMicrosoft();
