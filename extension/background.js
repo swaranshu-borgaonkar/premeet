@@ -146,6 +146,45 @@ async function handleMessage(message, sender) {
     case 'SIGN_IN_GOOGLE':
       return await signInWithGoogle(message.googleToken);
 
+    case 'STORE_SESSION': {
+      // Store session data from popup auth flow
+      const { encryptToken } = await import('./lib/token-encryption.js');
+      const { getConfig } = await import('./lib/config.js');
+      const config = await getConfig();
+      const session = message.session;
+      const googleToken = message.googleToken;
+
+      const encryptedRefresh = await encryptToken(session.refresh_token, session.user.id);
+
+      await chrome.storage.local.set({
+        user: session.user,
+        accessToken: session.access_token,
+        googleToken: googleToken,
+        encryptedRefreshToken: encryptedRefresh,
+        tokenExpiresAt: Date.now() + (session.expires_in * 1000),
+        calendarProvider: 'google',
+      });
+
+      // Initialize user profile
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      try {
+        await fetch(`${config.SUPABASE_URL}/rest/v1/users?id=eq.${session.user.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': config.SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({ timezone }),
+        });
+      } catch (e) {
+        // Non-critical
+      }
+
+      return { success: true, user: session.user };
+    }
+
     case 'SIGN_IN_MICROSOFT':
       return await signInWithMicrosoft();
 

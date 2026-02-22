@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('btn-signin').addEventListener('click', async () => {
   showScreen('loading');
   try {
-    // Get Google token from popup context (has user gesture)
+    // Step 1: Get Google token (popup context has user gesture)
     const googleToken = await new Promise((resolve, reject) => {
       chrome.identity.getAuthToken({ interactive: true }, (token) => {
         if (chrome.runtime.lastError) {
@@ -67,11 +67,42 @@ document.getElementById('btn-signin').addEventListener('click', async () => {
       throw new Error('No token received from Google');
     }
 
-    // Send token to background for Supabase exchange
-    const result = await sendMessage({ type: 'SIGN_IN_GOOGLE', googleToken });
+    // Step 2: Exchange with Supabase edge function (from popup context)
+    const SUPABASE_URL = 'https://llylsqokznmegiogsrfy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxseWxzcW9rem5tZWdpb2dzcmZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ0OTUsImV4cCI6MjA4NjY4MDQ5NX0.wJ-uYKjvSUk_FCbaKhlnHo0gS9rmomBMJOdAYztjFag';
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-google-exchange`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ google_access_token: googleToken }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Auth failed: ${response.status} — ${errorBody}`);
+    }
+
+    const session = await response.json();
+
+    if (session.error) {
+      throw new Error(session.error);
+    }
+
+    // Step 3: Store session via background
+    const result = await sendMessage({
+      type: 'STORE_SESSION',
+      session,
+      googleToken,
+    });
+
     if (result && result.error) {
       throw new Error(result.error);
     }
+
     await loadUpcomingEvents();
   } catch (error) {
     showScreen('auth');
