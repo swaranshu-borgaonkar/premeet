@@ -52,11 +52,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('btn-signin').addEventListener('click', async () => {
   showScreen('loading');
   try {
-    await sendMessage({ type: 'SIGN_IN_GOOGLE' });
+    const result = await sendMessage({ type: 'SIGN_IN_GOOGLE' });
+    if (result && result.error) {
+      throw new Error(result.error);
+    }
     await loadUpcomingEvents();
   } catch (error) {
     showScreen('auth');
-    showError('Sign in failed. Please try again.');
+    showError('Sign in failed: ' + (error.message || 'Please try again.'));
   }
 });
 

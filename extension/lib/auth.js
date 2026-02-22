@@ -11,7 +11,8 @@ export async function signInWithGoogle() {
     const config = await getConfig();
     const identity = getIdentityAPI();
 
-    const token = await new Promise((resolve, reject) => {
+    // Get Google access token via Chrome Identity API
+    const googleToken = await new Promise((resolve, reject) => {
       identity.getAuthToken({ interactive: true }, (token) => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
@@ -21,14 +22,14 @@ export async function signInWithGoogle() {
       });
     });
 
-    // Exchange Google token for Supabase session
-    const response = await fetch(`${config.SUPABASE_URL}/auth/v1/token?grant_type=id_token`, {
+    // Exchange Google access token for Supabase session via our edge function
+    const response = await fetch(`${config.SUPABASE_URL}/functions/v1/auth-google-exchange`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': config.SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify({ provider: 'google', token }),
+      body: JSON.stringify({ google_access_token: googleToken }),
     });
 
     if (!response.ok) {
@@ -38,6 +39,10 @@ export async function signInWithGoogle() {
 
     const session = await response.json();
 
+    if (session.error) {
+      throw new Error(session.error);
+    }
+
     // Encrypt and store refresh token
     const encryptedRefresh = await encryptToken(session.refresh_token, session.user.id);
 
@@ -45,7 +50,7 @@ export async function signInWithGoogle() {
     await chrome.storage.local.set({
       user: session.user,
       accessToken: session.access_token,
-      googleToken: token,
+      googleToken: googleToken,
       encryptedRefreshToken: encryptedRefresh,
       tokenExpiresAt: Date.now() + (session.expires_in * 1000),
       calendarProvider: 'google',
