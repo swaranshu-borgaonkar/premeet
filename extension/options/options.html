@@ -28,14 +28,14 @@
           <div id="step-1" class="step">
             <h1>Welcome to PrepMeet</h1>
             <p>Get 2-bullet context about your next client, 5 minutes before appointments.</p>
-            <button class="btn btn-primary" onclick="nextStep(2)">Get Started</button>
+            <button class="btn btn-primary" id="btn-start">Get Started</button>
           </div>
           <div id="step-2" class="step hidden">
             <h2>Connect Your Calendar</h2>
             <p>We need access to your calendar to know when your appointments are.</p>
             <button id="btn-connect-cal" class="btn btn-primary">Connect Google Calendar</button>
             <button id="btn-connect-microsoft" class="btn btn-secondary" style="margin-top:8px;">Connect Microsoft Outlook</button>
-            <button class="btn btn-link" onclick="nextStep(3)" style="margin-top:8px;">Skip for now</button>
+            <button class="btn btn-link" id="btn-skip-cal" style="margin-top:8px;">Skip for now</button>
           </div>
           <div id="step-3" class="step hidden">
             <h2>What's your profession?</h2>
@@ -51,7 +51,7 @@
           <div id="step-4" class="step hidden">
             <h2>You're all set!</h2>
             <p>Your 14-day free trial has started. We'll notify you 5 minutes before your next appointment.</p>
-            <button class="btn btn-primary" onclick="finishOnboarding()">Start Using PrepMeet</button>
+            <button class="btn btn-primary" id="btn-finish">Start Using PrepMeet</button>
           </div>
           <div class="step-dots">
             <span class="dot active" data-step="1"></span>

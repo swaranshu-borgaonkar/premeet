@@ -52,12 +52,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ─── Onboarding ──────────────────────────────────────────
 
-window.nextStep = function (step) {
+function nextStep(step) {
   document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
   document.getElementById(`step-${step}`).classList.remove('hidden');
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
   document.querySelector(`.dot[data-step="${step}"]`).classList.add('active');
-};
+}
+
+// Onboarding button listeners
+document.getElementById('btn-start')?.addEventListener('click', () => nextStep(2));
+document.getElementById('btn-skip-cal')?.addEventListener('click', () => nextStep(3));
+document.getElementById('btn-finish')?.addEventListener('click', () => finishOnboarding());
 
 // Connect calendar during onboarding
 document.getElementById('btn-connect-cal')?.addEventListener('click', async () => {
@@ -109,7 +114,7 @@ document.querySelectorAll('.profession-btn').forEach(btn => {
   });
 });
 
-window.finishOnboarding = function () {
+function finishOnboarding() {
   chrome.runtime.sendMessage({
     type: 'UPDATE_PROFILE',
     payload: { onboarding_completed: true },
