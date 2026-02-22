@@ -18,6 +18,9 @@
   "oauth2": {
     "client_id": "937205473410-ogh0cb1dss4ngjd7fulmgp454uojv5tp.apps.googleusercontent.com",
     "scopes": [
+      "openid",
+      "email",
+      "profile",
       "https://www.googleapis.com/auth/calendar.readonly",
       "https://www.googleapis.com/auth/gmail.send",
       "https://www.googleapis.com/auth/contacts.readonly"

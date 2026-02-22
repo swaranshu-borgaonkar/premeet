@@ -80,6 +80,7 @@ document.getElementById('btn-signin').addEventListener('click', async () => {
     });
 
     const session = await response.json();
+    console.log('Auth response:', JSON.stringify(session));
 
     if (session.error) {
       throw new Error(session.error + (session.detail ? ` (${session.detail})` : ''));
@@ -390,16 +391,18 @@ function hide(id) {
 }
 
 function showError(msg) {
-  // Simple inline error
+  console.error('PrepMeet error:', msg);
   let errorEl = document.getElementById('popup-error');
   if (!errorEl) {
     errorEl = document.createElement('div');
     errorEl.id = 'popup-error';
     errorEl.style.cssText = 'background:#FEF2F2;color:#991B1B;padding:8px 12px;border-radius:6px;font-size:13px;margin-bottom:8px;';
-    document.querySelector('.screen:not(.hidden) .content:not(.hidden)')?.prepend(errorEl);
+    const target = document.querySelector('.screen:not(.hidden) .content:not(.hidden)')
+      || document.querySelector('.screen:not(.hidden)');
+    target?.prepend(errorEl);
   }
   errorEl.textContent = msg;
-  setTimeout(() => errorEl?.remove(), 5000);
+  setTimeout(() => errorEl?.remove(), 10000);
 }
 
 function showSuccess(msg) {

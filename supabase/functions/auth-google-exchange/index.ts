@@ -27,22 +27,48 @@ serve(async (req) => {
       return jsonResponse({ error: 'google_access_token required' });
     }
 
-    // 1. Verify the Google access token
-    const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${google_access_token}` },
-    });
+    // 1. Verify the Google access token via tokeninfo (works without openid scope)
+    const tokenInfoResponse = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${google_access_token}`
+    );
 
-    if (!googleResponse.ok) {
-      const googleErr = await googleResponse.text();
-      console.error('Google userinfo failed:', googleResponse.status, googleErr);
-      return jsonResponse({ error: 'Invalid Google access token', detail: googleErr });
+    if (!tokenInfoResponse.ok) {
+      const tokenErr = await tokenInfoResponse.text();
+      console.error('Google tokeninfo failed:', tokenInfoResponse.status, tokenErr);
+      return jsonResponse({ error: 'Invalid Google access token', detail: tokenErr });
     }
 
-    const googleUser = await googleResponse.json();
+    const tokenInfo = await tokenInfoResponse.json();
+    // tokenInfo: { azp, aud, sub, scope, exp, expires_in, email, email_verified, access_type }
 
-    if (!googleUser.email) {
-      return jsonResponse({ error: 'No email in Google profile' });
+    if (!tokenInfo.email) {
+      return jsonResponse({ error: 'No email in Google token' });
     }
+
+    // Try to get full profile (name, picture) via People API using the access token
+    let fullName = tokenInfo.email.split('@')[0]; // fallback
+    let avatarUrl = '';
+    try {
+      const peopleResponse = await fetch(
+        'https://people.googleapis.com/v1/people/me?personFields=names,photos',
+        { headers: { Authorization: `Bearer ${google_access_token}` } }
+      );
+      if (peopleResponse.ok) {
+        const people = await peopleResponse.json();
+        fullName = people.names?.[0]?.displayName || fullName;
+        avatarUrl = people.photos?.[0]?.url || '';
+      }
+    } catch (e) {
+      // Non-critical — we have email, that's enough
+      console.log('People API optional fetch failed:', e.message);
+    }
+
+    const googleUser = {
+      sub: tokenInfo.sub,
+      email: tokenInfo.email,
+      name: fullName,
+      picture: avatarUrl,
+    };
 
     console.log('Google user verified:', googleUser.email);
 
