@@ -28,6 +28,7 @@ export async function signInWithGoogle() {
       headers: {
         'Content-Type': 'application/json',
         'apikey': config.SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${config.SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ google_access_token: googleToken }),
     });
