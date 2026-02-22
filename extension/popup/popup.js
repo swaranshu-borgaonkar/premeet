@@ -75,21 +75,14 @@ document.getElementById('btn-signin').addEventListener('click', async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ google_access_token: googleToken }),
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Auth failed: ${response.status} — ${errorBody}`);
-    }
-
     const session = await response.json();
 
     if (session.error) {
-      throw new Error(session.error);
+      throw new Error(session.error + (session.detail ? ` (${session.detail})` : ''));
     }
 
     // Step 3: Store session via background

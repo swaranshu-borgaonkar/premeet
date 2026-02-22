@@ -4,61 +4,58 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+const CORS_HEADERS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey',
+};
+
+function jsonResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), { status, headers: CORS_HEADERS });
+}
+
 serve(async (req) => {
-  // CORS
   if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey',
-      },
-    });
+    return new Response('ok', { headers: CORS_HEADERS });
   }
 
   try {
     const { google_access_token } = await req.json();
 
     if (!google_access_token) {
-      return new Response(JSON.stringify({ error: 'google_access_token required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      return jsonResponse({ error: 'google_access_token required' });
     }
 
-    // 1. Verify the Google access token by calling Google's userinfo endpoint
+    // 1. Verify the Google access token
     const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${google_access_token}` },
     });
 
     if (!googleResponse.ok) {
-      return new Response(JSON.stringify({ error: 'Invalid Google access token' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      const googleErr = await googleResponse.text();
+      console.error('Google userinfo failed:', googleResponse.status, googleErr);
+      return jsonResponse({ error: 'Invalid Google access token', detail: googleErr });
     }
 
     const googleUser = await googleResponse.json();
-    // googleUser: { sub, email, email_verified, name, picture, given_name, family_name }
 
     if (!googleUser.email) {
-      return new Response(JSON.stringify({ error: 'No email in Google profile' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      return jsonResponse({ error: 'No email in Google profile' });
     }
 
-    // 2. Use Supabase Admin API to find or create the user
+    console.log('Google user verified:', googleUser.email);
+
+    // 2. Find or create the Supabase user
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
     // Check if user exists by email
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    let user = existingUsers?.users?.find((u: any) => u.email === googleUser.email);
+    const { data: { users: existingUsers } } = await supabase.auth.admin.listUsers();
+    let user = existingUsers?.find((u: any) => u.email === googleUser.email);
 
     if (!user) {
-      // Create new user
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: googleUser.email,
         email_confirm: true,
@@ -71,10 +68,8 @@ serve(async (req) => {
       });
 
       if (createError) {
-        return new Response(JSON.stringify({ error: `User creation failed: ${createError.message}` }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        });
+        console.error('User creation failed:', createError);
+        return jsonResponse({ error: `User creation failed: ${createError.message}` });
       }
 
       user = newUser.user;
@@ -89,11 +84,12 @@ serve(async (req) => {
         full_name: googleUser.name,
         subscription_tier: 'free',
         trial_ends_at: trialEnd.toISOString(),
-        timezone: 'America/New_York', // Will be updated by extension
+        timezone: 'America/New_York',
         status: 'active',
       }, { onConflict: 'id' });
+
+      console.log('New user created:', user.id);
     } else {
-      // Update existing user metadata
       await supabase.auth.admin.updateUserById(user.id, {
         user_metadata: {
           ...user.user_metadata,
@@ -102,30 +98,23 @@ serve(async (req) => {
           google_sub: googleUser.sub,
         },
       });
+      console.log('Existing user found:', user.id);
     }
 
-    // 3. Generate a Supabase session for this user
-    // Use admin generateLink to create a magic link, then exchange it
-    // Actually, the simplest approach: use admin to create a session directly
+    // 3. Generate a session via magic link + verify
     const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email: googleUser.email,
     });
 
     if (sessionError || !sessionData) {
-      return new Response(JSON.stringify({ error: `Session creation failed: ${sessionError?.message}` }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      console.error('Session creation failed:', sessionError);
+      return jsonResponse({ error: `Session creation failed: ${sessionError?.message}` });
     }
 
-    // Extract the token hash and verify it to get a session
     const tokenHash = sessionData.properties?.hashed_token;
     if (!tokenHash) {
-      return new Response(JSON.stringify({ error: 'Failed to generate auth token' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      return jsonResponse({ error: 'Failed to generate auth token' });
     }
 
     // Verify the OTP to get a real session
@@ -143,15 +132,14 @@ serve(async (req) => {
 
     if (!verifyResponse.ok) {
       const errText = await verifyResponse.text();
-      return new Response(JSON.stringify({ error: `Token verification failed: ${errText}` }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      console.error('Token verification failed:', errText);
+      return jsonResponse({ error: `Token verification failed: ${errText}` });
     }
 
     const session = await verifyResponse.json();
+    console.log('Session created for:', googleUser.email);
 
-    return new Response(JSON.stringify({
+    return jsonResponse({
       user: {
         id: user.id,
         email: googleUser.email,
@@ -161,14 +149,9 @@ serve(async (req) => {
       access_token: session.access_token,
       refresh_token: session.refresh_token,
       expires_in: session.expires_in || 3600,
-    }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
   } catch (error) {
     console.error('Auth exchange error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    });
+    return jsonResponse({ error: error.message });
   }
 });
